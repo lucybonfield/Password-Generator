@@ -88,32 +88,73 @@ var upperCasedCharacters = [
   'Z'
 ];
 
+const TYPE_NUMBER = 0;
+const TYPE_BOOLEAN = 1;
+const TYPE_STRING = 2;
+
+const config = {
+  len: 8,
+  upc: false,
+  loc: false,
+  num: false,
+  sym: false
+};
+
 // Function to prompt user for password options
-function getPasswordOptions() {
-  let passwordLengthQuery = prompt("How long do you want your password to be? Must be between 8 and 128 characters.");
-  passwordLengthQuery = parseInt(passwordLengthQuery);
-  if (passwordLengthQuery < 8 || passwordLengthQuery > 128) {
-    alert("Password must be at least 8 characters, but not more than 128");
-    getPasswordOptions();
+function ask(msg, type) {
+  let result;
+  if (type === TYPE_BOOLEAN) {
+    result = confirm(msg);
+  } else if (type === TYPE_NUMBER) {
+    result = parseInt(prompt(msg));
+  } else if (type === TYPE_STRING) {
+    result = prompt(msg);
+  } else {
+    result = "";
   }
-  let lowercaseQuery =  confirm("Do you want it to include lowercase letters?");
-  let uppercaseQuery =  confirm("Do you want it to include uppercase letters?");
-  let numericQuery =  confirm("Do you want it to include numbers?");
-  let specialCharactersQuery =  confirm("Do you want it to include special characters?");
+  return result;
 }
 
-// Function for getting a random element from an array
-function getRandom(arr) {
-  const randomSpecialCharacters = Math.floor(Math.random() * specialCharacters.length);
-  const randomNumericCharacters = Math.floor(Math.random() * numericCharacters.length);
-  const randomLowerCasedCharacters = Math.floor(Math.random() * lowerCasedCharacters.length);
-  const randomUpperCasedCharacters = Math.floor(Math.random() * upperCasedCharacters.length);
+function getPasswordOptions() {
+  while (true) {
+    passwordLength = ask('How many charcters would you like? (8-128)', TYPE_NUMBER);
+    if (passwordLength <= 128 && passwordLength >= 8) {
+      config.passwordLength = passwordLength; 
+      return passwordLength;
+    } else {
+      alert("Password must be 8 to 128 characters long!");
+    }
+  }
 }
+getPasswordOptions();
+
+const upc = ask('Would you like to use Capital letters?', TYPE_BOOLEAN);
+if (upc) { config.upc = upc; }
+const loc = ask('Would you like to use lower case letters?', TYPE_BOOLEAN);
+if (loc) { config.loc = loc; }
+const num = ask('Would you like to use Numbers?', TYPE_BOOLEAN);
+if (num) { config.num = num; }
+const sym = ask('Would you like to use symbols?', TYPE_BOOLEAN);
+if (sym) { config.sym = sym; }
 
 // Function to generate password with user input
-function generatePassword() {
-
+function generatePassword(length) {
+  const characterSets = [];
+  if (upc) characterSets.push(upperCasedCharacters);
+  if (loc) characterSets.push(lowerCasedCharacters);
+  if (num) characterSets.push(numericCharacters);
+  if (sym) characterSets.push(specialCharacters);
+  if (characterSets.length === 0) {
+    return "Invalid configuration"; // Handle the case where no character sets are selected.
+  }
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    const randomSet = characterSets[Math.floor(Math.random() * characterSets.length)]; // getting a random element from an array
+    password += randomSet[Math.floor(Math.random() * randomSet.length)];
+  }
+  return password;
 }
+console.log(generatePassword(passwordLength));
 
 // Get references to the #generate element
 var generateBtn = document.querySelector('#generate');
