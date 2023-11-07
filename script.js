@@ -116,56 +116,55 @@ function ask(msg, type) {
 }
 
 function getPasswordOptions() {
+  config.len = 8;
+  config.upc = false;
+  config.loc = false;
+  config.num = false;
+  config.sym = false;
+
   while (true) {
     passwordLength = ask('How many charcters would you like? (8-128)', TYPE_NUMBER);
     if (passwordLength <= 128 && passwordLength >= 8) {
-      config.passwordLength = passwordLength; 
-      return passwordLength;
+      config.len = passwordLength; 
+
+      config.upc = ask('Would you like to use capital letters?', TYPE_BOOLEAN);
+      config.loc = ask('Would you like to use lower case letters?', TYPE_BOOLEAN);
+      config.num = ask('Would you like to use numbers?', TYPE_BOOLEAN);
+      config.sym = ask('Would you like to use symbols?', TYPE_BOOLEAN);
+      break;
     } else {
       alert("Password must be 8 to 128 characters long!");
     }
   }
 }
-getPasswordOptions();
 
-const upc = ask('Would you like to use Capital letters?', TYPE_BOOLEAN);
-if (upc) { config.upc = upc; }
-const loc = ask('Would you like to use lower case letters?', TYPE_BOOLEAN);
-if (loc) { config.loc = loc; }
-const num = ask('Would you like to use Numbers?', TYPE_BOOLEAN);
-if (num) { config.num = num; }
-const sym = ask('Would you like to use symbols?', TYPE_BOOLEAN);
-if (sym) { config.sym = sym; }
+// Get references to the #generate element
+var generateBtn = document.querySelector('#generate');
+var passwordDisplay = document.querySelector('#password');
+
+// Add event listener to generate button
+generateBtn.addEventListener('click', function() {
+  getPasswordOptions();
+
+  var password = generatePassword();
+  passwordDisplay.textContent = password;
+});
 
 // Function to generate password with user input
-function generatePassword(length) {
+function generatePassword() {
   const characterSets = [];
-  if (upc) characterSets.push(upperCasedCharacters);
-  if (loc) characterSets.push(lowerCasedCharacters);
-  if (num) characterSets.push(numericCharacters);
-  if (sym) characterSets.push(specialCharacters);
+  if (config.upc) characterSets.push(upperCasedCharacters);
+  if (config.loc) characterSets.push(lowerCasedCharacters);
+  if (config.num) characterSets.push(numericCharacters);
+  if (config.sym) characterSets.push(specialCharacters);
   if (characterSets.length === 0) {
     return "Invalid configuration"; // Handle the case where no character sets are selected.
   }
   let password = '';
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < config.len; i++) {
     const randomSet = characterSets[Math.floor(Math.random() * characterSets.length)]; // getting a random element from an array
     password += randomSet[Math.floor(Math.random() * randomSet.length)];
   }
   return password;
 }
-console.log(generatePassword(passwordLength));
 
-// Get references to the #generate element
-var generateBtn = document.querySelector('#generate');
-
-// Write password to the #password input
-function writePassword() {
-  var password = generatePassword();
-  var passwordText = document.querySelector('#password');
-
-  passwordText.value = password;
-}
-
-// Add event listener to generate button
-generateBtn.addEventListener('click', writePassword);
